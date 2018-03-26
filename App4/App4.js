@@ -3,10 +3,10 @@ var mysql = require('mysql')
 var app = express()
 
 var connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'root',
-    database: 'app'
+    host: 'cgm276serverdata.c2a970tk0l08.ap-southeast-1.rds.amazonaws.com',
+    user: 'snailsaz',
+    password: 'avatar2142',
+    database: 'cgm276serverdata'
 })
 
 connection.connect(function (err) {
@@ -35,10 +35,21 @@ app.get('/user', function (req, res) {
 })
 
 app.get('/user/:name', function (req, res) {
-    var name = [req.params.name]
-    queryUser(name, function (err, result) {
+    var name = req.params.name
+    console.log(name)
+
+})
+
+app.get('/user/add/user', function (req,res){
+    var name = req.query.name
+    var password = req.query.pass
+
+    var user = [[name,password]]
+    InsertUser(user, function(err,result){
         res.end(result)
     })
+
+
 })
 
 var server = app.listen(8081, function () {
@@ -57,30 +68,18 @@ function queryAllUser(callback) {
         })
 }
 
-/*function queryUser(callback) {
-    var json = ''
+function InsertUser(user, callback) {
+    var sql = 'INSERT INTO user(name,password) values ?'
     
-    connection.query('SELECT * FROM user WHERE name = "homeless"',
-        function (err, rows, fields) {
-            if (err) throw err
+    connection.query(sql,[user],
+        function (err) {
 
-            json = JSON.stringify(rows)
+            var res = '[{"success" : "true"}]'
+            if (err) {
+                res = '[{"success" : "false"}]'
 
-            callback(null, json)
-        })
-}*/
-
-function queryUser(name,callback) {
-    var json = ''
-
-    var sql = 'SELECT * FROM user WHERE name = ?'
-
-    connection.query(sql,[name],
-        function (err, rows, fields) {
-            if (err) throw err
-
-            json = JSON.stringify(rows)
-
-            callback(null, json)
+                throw err
+            }
+            callback(null, res)
         })
 }
